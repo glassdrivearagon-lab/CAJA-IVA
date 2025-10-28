@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlassDrive - Gestión de IVA y Caja</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-logo">
+                <img src="logolargo.jpg" alt="GlassDrive Logo" class="logo-img">
+            </div>
+            <h1 class="login-title">Sistema de Gestión de IVA</h1>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Usuario</label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full-width">Iniciar Sesión</button>
+                <div id="loginError" class="login-error hidden"></div>
+            </form>
+            <div class="login-help">
+                <p><strong>Usuarios de prueba:</strong></p>
+                <p>Admin: admin / admin123</p>
+                <p>Taller: taller1 / taller123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <img src="logolargo.jpg" alt="GlassDrive" class="header-logo">
+            </div>
+            <div class="header-center">
+                <h2 id="headerTitle">Dashboard</h2>
+                <p id="headerSubtitle" class="header-subtitle"></p>
+            </div>
+            <div class="header-right">
+                <span id="userInfo" class="user-info"></span>
+                <button id="logoutBtn" class="btn btn--secondary btn--sm">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav id="mainNav" class="main-nav">
+            <!-- Dynamic navigation items will be inserted here -->
+        </nav>
+
+        <!-- Content Area -->
+        <main class="main-content">
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="view-section hidden">
+                <div class="dashboard-metrics">
+                    <div class="metric-card">
+                        <div class="metric-icon">💰</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Total Facturado Hoy</h3>
+                            <p class="metric-value" id="totalFacturadoHoy">0 €</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">📊</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">IVA Recaudado Hoy</h3>
+                            <p class="metric-value" id="ivaRecaudadoHoy">0 €</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">🔧</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Trabajos Realizados</h3>
+                            <p class="metric-value" id="trabajosRealizados">0</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">🏢</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Talleres Activos</h3>
+                            <p class="metric-value" id="talleresActivos">4</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-charts">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Distribución por Tipo de Cliente</h3>
+                        <div class="chart-container">
+                            <canvas id="clienteTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Facturación por Taller</h3>
+                        <div class="chart-container">
+                            <canvas id="tallerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Talleres View -->
+            <div id="adminTalleres" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Gestión de Talleres</h2>
+                </div>
+                <div id="talleresGrid" class="talleres-grid"></div>
+            </div>
+
+            <!-- Admin Reports -->
+            <div id="adminReportes" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Reportes e Informes</h2>
+                </div>
+                <div class="report-filters">
+                    <div class="form-group">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input type="date" id="reportFechaInicio" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha Fin</label>
+                        <input type="date" id="reportFechaFin" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Taller</label>
+                        <select id="reportTaller" class="form-control">
+                            <option value="">Todos los talleres</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button id="generarReporteBtn" class="btn btn--primary">Generar Reporte</button>
+                        <button id="exportarCSVBtn" class="btn btn--secondary">Exportar CSV</button>
+                    </div>
+                </div>
+                <div id="reporteResultado" class="reporte-resultado"></div>
+            </div>
+
+            <!-- Taller: Nuevo Trabajo -->
+            <div id="tallerNuevoTrabajo" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Registrar Nuevo Trabajo</h2>
+                </div>
+                <div class="trabajo-form-container">
+                    <form id="nuevoTrabajoForm" class="trabajo-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Fecha</label>
+                                <input type="date" id="trabajoFecha" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nº Orden</label>
+                                <input type="text" id="trabajoNumOrden" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Cliente *</label>
+                            <select id="trabajoTipoCliente" class="form-control" required>
+                                <option value="">Seleccione tipo de cliente...</option>
+                            </select>
+                        </div>
+
+                        <div id="casoIvaInfo" class="caso-iva-info hidden"></div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Nombre del Cliente *</label>
+                                <input type="text" id="trabajoNombreCliente" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">NIF/CIF</label>
+                                <input type="text" id="trabajoNifCif" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Descripción del Trabajo *</label>
+                            <textarea id="trabajoDescripcion" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Base Imponible (€) *</label>
+                                <input type="number" id="trabajoBase" class="form-control" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">IVA %</label>
+                                <input type="text" id="trabajoIvaPorcentaje" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">IVA Importe (€)</label>
+                                <input type="text" id="trabajoIvaImporte" class="form-control" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Total (€)</label>
+                                <input type="text" id="trabajoTotal" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Método de Pago *</label>
+                            <select id="trabajoMetodoPago" class="form-control" required>
+                                <option value="">Seleccione método de pago...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Notas Adicionales</label>
+                            <textarea id="trabajoNotas" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary">💾 Guardar Trabajo</button>
+                            <button type="reset" class="btn btn--secondary">🔄 Limpiar Formulario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Taller: Caja del Día -->
+            <div id="tallerCajaDia" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Caja del Día</h2>
+                    <p class="section-subtitle" id="cajaDiaFecha"></p>
+                </div>
+
+                <div class="caja-resumen">
+                    <div class="resumen-card">
+                        <h3>Base Imponible</h3>
+                        <p class="resumen-value" id="cajaBaseTotal">0.00 €</p>
+                    </div>
+                    <div class="resumen-card">
+                        <h3>IVA Total</h3>
+                        <p class="resumen-value" id="cajaIvaTotal">0.00 €</p>
+                    </div>
+                    <div class="resumen-card highlight">
+                        <h3>Total Facturado</h3>
+                        <p class="resumen-value" id="cajaTotalFacturado">0.00 €</p>
+                    </div>
+                </div>
+
+                <div class="caja-desglose">
+                    <div class="desglose-section">
+                        <h3>Por Método de Pago</h3>
+                        <div id="desgloseMetodoPago" class="desglose-content"></div>
+                    </div>
+                    <div class="desglose-section">
+                        <h3>Por Tipo de Cliente</h3>
+                        <div id="desgloseTipoCliente" class="desglose-content"></div>
+                    </div>
+                </div>
+
+                <div class="trabajos-list">
+                    <h3>Trabajos del Día</h3>
+                    <div id="trabajosDiaTabla" class="table-container"></div>
+                </div>
+            </div>
+
+            <!-- Taller: Historial -->
+            <div id="tallerHistorial" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Historial de Trabajos</h2>
+                </div>
+                <div class="historial-filters">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Fecha Inicio</label>
+                            <input type="date" id="historialFechaInicio" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fecha Fin</label>
+                            <input type="date" id="historialFechaFin" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tipo Cliente</label>
+                            <select id="historialTipoCliente" class="form-control">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Método Pago</label>
+                            <select id="historialMetodoPago" class="form-control">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button id="filtrarHistorialBtn" class="btn btn--primary">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="historialTabla" class="table-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="confirmTitle">Confirmar</h3>
+            <p id="confirmMessage"></p>
+            <div class="modal-actions">
+                <button id="confirmYes" class="btn btn--primary">Sí</button>
+                <button id="confirmNo" class="btn btn--secondary">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+{
+  "casos_iva": [
+    {
+      "id": 1,
+      "nombre": "Cliente Particular",
+      "codigo": "B2C",
+      "descripcion": "Cliente es persona física sin actividad empresarial",
+      "iva_porcentaje": 21,
+      "quien_paga_iva": "Cliente",
+      "iva_deducible": false,
+      "color": "#FF6B6B",
+      "instrucciones": "Facturar con IVA al 21%. El cliente paga el total incluyendo IVA."
+    },
+    {
+      "id": 2,
+      "nombre": "Cliente Empresa/Autónomo",
+      "codigo": "B2B",
+      "descripcion": "Cliente es empresa o autónomo con CIF/NIF",
+      "iva_porcentaje": 21,
+      "quien_paga_iva": "Empresa (deducible)",
+      "iva_deducible": true,
+      "color": "#4ECDC4",
+      "instrucciones": "Facturar con IVA al 21%. La empresa puede deducir el IVA en su declaración trimestral."
+    },
+    {
+      "id": 3,
+      "nombre": "Seguro - Vehículo Particular",
+      "codigo": "SEG_PART",
+      "descripcion": "Reparación cubierta por seguro, vehículo de particular",
+      "iva_porcentaje": 21,
+      "quien_paga_iva": "Cliente particular (normalmente)",
+      "iva_deducible": false,
+      "color": "#FFE66D",
+      "instrucciones": "Aseguradora paga reparación sin IVA. Cliente paga el IVA del 21%. Verificar contrato de seguro."
+    },
+    {
+      "id": 4,
+      "nombre": "Seguro - Vehículo Empresa",
+      "codigo": "SEG_EMP",
+      "descripcion": "Reparación cubierta por seguro, vehículo de empresa",
+      "iva_porcentaje": 21,
+      "quien_paga_iva": "Empresa propietaria",
+      "iva_deducible": true,
+      "color": "#95E1D3",
+      "instrucciones": "Aseguradora paga sin IVA. Empresa paga IVA pero lo recupera de Hacienda. Facturar a nombre de la empresa."
+    },
+    {
+      "id": 5,
+      "nombre": "Con Franquicia de Seguro",
+      "codigo": "FRANQ_SEG",
+      "descripcion": "Reparación con parte a cargo del cliente (franquicia)",
+      "iva_porcentaje": 21,
+      "quien_paga_iva": "Según tipo de cliente",
+      "iva_deducible": "Depende del cliente",
+      "color": "#F38181",
+      "instrucciones": "IVA se calcula sobre importe TOTAL (seguro + franquicia). Indicar en factura ambas partes."
+    },
+    {
+      "id": 6,
+      "nombre": "Exceso Límite 85.000€",
+      "codigo": "EXCESO",
+      "descripcion": "Taller supera límite de franquicia de IVA (85.000€/año)",
+      "iva_porcentaje": 21,
+      "quien_paga_iva": "Obligatorio aplicar IVA",
+      "iva_deducible": "N/A",
+      "color": "#AA96DA",
+      "instrucciones": "Si facturación anual supera 85.000€, se pierde exención. Aplicar IVA obligatoriamente."
+    }
+  ],
+  "talleres_ejemplo": [
+    {
+      "id": 1,
+      "nombre": "GlassDrive Madrid Centro",
+      "ubicacion": "Madrid",
+      "codigo": "GD-MAD-001",
+      "facturacion_anual": 125000,
+      "regimen_iva": "general"
+    },
+    {
+      "id": 2,
+      "nombre": "GlassDrive Barcelona Norte",
+      "ubicacion": "Barcelona",
+      "codigo": "GD-BCN-002",
+      "facturacion_anual": 98000,
+      "regimen_iva": "general"
+    },
+    {
+      "id": 3,
+      "nombre": "GlassDrive Valencia",
+      "ubicacion": "Valencia",
+      "codigo": "GD-VLC-003",
+      "facturacion_anual": 67000,
+      "regimen_iva": "general"
+    }
+  ],
+  "tipos_usuario": [
+    {
+      "rol": "admin",
+      "nombre": "Administrador",
+      "permisos": [
+        "ver_todos_talleres",
+        "dashboard_general",
+        "reportes",
+        "gestion_usuarios"
+      ],
+      "descripcion": "Acceso completo al sistema"
+    },
+    {
+      "rol": "taller",
+      "nombre": "Usuario de Taller",
+      "permisos": [
+        "ver_propio_taller",
+        "registrar_trabajos",
+        "calcular_iva",
+        "ver_caja"
+      ],
+      "descripcion": "Acceso limitado a su taller"
+    }
+  ],
+  "campos_trabajo": [
+    "fecha",
+    "numero_orden",
+    "tipo_cliente",
+    "nombre_cliente",
+    "nif_cif",
+    "tipo_trabajo",
+    "base_imponible",
+    "iva_porcentaje",
+    "iva_importe",
+    "total",
+    "metodo_pago",
+    "notas"
+  ]
+}
