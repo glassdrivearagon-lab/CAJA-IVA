@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlassDrive - Gestor de IVA y Caja</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- PANTALLA DE LOGIN -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-box">
+                <img src="logolargo.jpg" alt="GlassDrive" class="logo-login">
+                <h1>Gestor de IVA y Caja</h1>
+                <p class="subtitle">GlassDrive Talleres</p>
+                
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="username">Usuario:</label>
+                        <input type="text" id="username" placeholder="Introduce tu usuario" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" placeholder="Introduce tu contraseña" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+                    
+                    <div id="loginError" class="error-message"></div>
+                </form>
+                
+                <div class="login-help">
+                    <p><strong>Datos de prueba:</strong></p>
+                    <p>Admin: admin / admin123</p>
+                    <p>Taller: taller1 / taller123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA PRINCIPAL -->
+    <div id="mainScreen" class="screen">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-header">
+                    <img src="logolargo.jpg" alt="GlassDrive" class="logo-small">
+                </div>
+                <div class="header-title">
+                    <h1>GlassDrive - Gestor de IVA y Caja</h1>
+                    <p id="userInfo" class="user-info"></p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="handleLogout()">Cerrar Sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENEDOR PRINCIPAL -->
+        <div class="main-container">
+            <!-- MENÚ LATERAL -->
+            <aside class="sidebar">
+                <nav class="nav-menu">
+                    <div id="adminMenu" class="menu-section" style="display: none;">
+                        <h3>Administrador</h3>
+                        <ul>
+                            <li><a href="#" onclick="showSection('dashboardAdmin'); return false;"><i>📊</i> Dashboard</a></li>
+                            <li><a href="#" onclick="showSection('controlCaja'); return false;"><i>💰</i> Control de Caja</a></li>
+                            <li><a href="#" onclick="showSection('controlTPV'); return false;"><i>💳</i> Control TPV</a></li>
+                            <li><a href="#" onclick="showSection('talleres'); return false;"><i>🏢</i> Talleres</a></li>
+                            <li><a href="#" onclick="showSection('reportes'); return false;"><i>📈</i> Reportes</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div id="tallerMenu" class="menu-section" style="display: none;">
+                        <h3>Mi Taller</h3>
+                        <ul>
+                            <li><a href="#" onclick="showSection('nuevoApunte'); return false;"><i>➕</i> Nuevo Apunte</a></li>
+                            <li><a href="#" onclick="showSection('cajaDia'); return false;"><i>📋</i> Caja del Día</a></li>
+                            <li><a href="#" onclick="showSection('controlTPVTaller'); return false;"><i>💳</i> Control TPV</a></li>
+                            <li><a href="#" onclick="showSection('historial'); return false;"><i>📜</i> Historial</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- CONTENIDO PRINCIPAL -->
+            <main class="content">
+                
+                <!-- DASHBOARD ADMIN -->
+                <section id="dashboardAdmin" class="content-section" style="display: none;">
+                    <h2>Dashboard General</h2>
+                    <div class="dashboard-grid">
+                        <div class="card metric-card">
+                            <h3>Total IVA Hoy</h3>
+                            <p class="metric-value" id="totalIVAHoy">€0.00</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Total Movimientos Caja</h3>
+                            <p class="metric-value" id="totalMovCaja">€0.00</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Total Cobros TPV</h3>
+                            <p class="metric-value" id="totalCobroTPV">€0.00</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Apuntes Registrados</h3>
+                            <p class="metric-value" id="totalApuntes">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="card">
+                            <h3>Distribución por Tipo de Apunte</h3>
+                            <div id="chartTipos" class="chart-placeholder">
+                                <canvas id="chartTiposCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CONTROL DE CAJA ADMIN -->
+                <section id="controlCaja" class="content-section" style="display: none;">
+                    <h2>Control de Caja por Taller</h2>
+                    
+                    <div class="filter-group">
+                        <label for="filterTallerCaja">Selecciona Taller:</label>
+                        <select id="filterTallerCaja" onchange="loadCajaTaller()">
+                            <option value="">-- Todos los talleres --</option>
+                        </select>
+                    </div>
+                    
+                    <div id="cajaTallerContent" class="content-grid">
+                        <div class="card">
+                            <h3>Información de Caja</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Saldo Inicial:</label>
+                                    <p id="saldoInicial">€0.00</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Movimientos Hoy:</label>
+                                    <p id="movimientosHoy">€0.00</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Saldo Actual:</label>
+                                    <p id="saldoActual" class="highlight">€0.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Movimientos de Caja del Día</h3>
+                        <table id="tablaCajaDia" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Concepto</th>
+                                    <th>Tipo</th>
+                                    <th>Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- CONTROL TPV ADMIN -->
+                <section id="controlTPV" class="content-section" style="display: none;">
+                    <h2>Control de Cobros por TPV</h2>
+                    
+                    <div class="filter-group">
+                        <label for="filterTallerTPV">Taller:</label>
+                        <select id="filterTallerTPV" onchange="loadCobroTPVAdmin()">
+                            <option value="">-- Todos --</option>
+                        </select>
+                        
+                        <label for="filterEstadoTPV">Estado:</label>
+                        <select id="filterEstadoTPV" onchange="loadCobroTPVAdmin()">
+                            <option value="">-- Todos --</option>
+                            <option value="si">Cobrado</option>
+                            <option value="no">Pendiente</option>
+                        </select>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Registros TPV</h3>
+                        <table id="tablaTPVAdmin" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>ID</th>
+                                    <th>Taller</th>
+                                    <th>Cliente</th>
+                                    <th>Importe</th>
+                                    <th>Cobrado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VISTA TALLERES ADMIN -->
+                <section id="talleres" class="content-section" style="display: none;">
+                    <h2>Gestión de Talleres</h2>
+                    
+                    <div class="card">
+                        <table id="tablaTalleres" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Ubicación</th>
+                                    <th>Saldo Caja</th>
+                                    <th>Apuntes Hoy</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- REPORTES ADMIN -->
+                <section id="reportes" class="content-section" style="display: none;">
+                    <h2>Reportes</h2>
+                    
+                    <div class="filter-group">
+                        <label for="reportFecha">Fecha:</label>
+                        <input type="date" id="reportFecha">
+                        
+                        <label for="reportTipo">Tipo de Apunte:</label>
+                        <select id="reportTipo">
+                            <option value="">-- Todos --</option>
+                        </select>
+                        
+                        <button class="btn btn-primary" onclick="generarReporte()">Generar Reporte</button>
+                        <button class="btn btn-secondary" onclick="exportarCSV()">Exportar CSV</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Resumen de Reportes</h3>
+                        <div id="reporteContent"></div>
+                    </div>
+                </section>
+
+                <!-- NUEVO APUNTE TALLER -->
+                <section id="nuevoApunte" class="content-section" style="display: none;">
+                    <h2>Nuevo Apunte</h2>
+                    
+                    <div class="form-card card">
+                        <form id="formNuevoApunte" onsubmit="handleGuardarApunte(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="apunteFecha">Fecha:</label>
+                                    <input type="date" id="apunteFecha" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="apunteID">Nº Identificación:</label>
+                                    <input type="text" id="apunteID" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="apunteTipo">Tipo de Apunte:</label>
+                                    <select id="apunteTipo" required onchange="actualizarInfoApunte()">
+                                        <option value="">-- Selecciona tipo --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div id="infoApunte" class="info-box" style="display: none;"></div>
+                            
+                            <div class="form-row">
+                                <div class="form-group flex-grow">
+                                    <label for="apunteCliente">Cliente:</label>
+                                    <div class="cliente-input-group">
+                                        <input type="text" id="apunteCliente" placeholder="Busca un cliente..." autocomplete="off">
+                                        <div id="clienteDropdown" class="dropdown-list"></div>
+                                        <button type="button" class="btn btn-small" onclick="abrirModalCliente()">+ Añadir</button>
+                                    </div>
+                                    <input type="hidden" id="apunteClienteID">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="apunteImporte">Importe IVA (€):</label>
+                                    <input type="number" id="apunteImporte" step="0.01" min="0" placeholder="0.00" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="apuntePago">Método de Pago:</label>
+                                    <select id="apuntePago" required>
+                                        <option value="">-- Selecciona método --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="apunteALTAI">Factura ALTAI:</label>
+                                    <input type="text" id="apunteALTAI" placeholder="Número de factura (opcional)">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="apunteCobrado">
+                                        Cobrado
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label for="apunteNotas">Notas Adicionales:</label>
+                                    <textarea id="apunteNotas" rows="3" placeholder="Añade notas si es necesario..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Guardar Apunte</button>
+                                <button type="reset" class="btn btn-secondary">Limpiar</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- CAJA DEL DÍA TALLER -->
+                <section id="cajaDia" class="content-section" style="display: none;">
+                    <h2>Caja del Día</h2>
+                    
+                    <div class="dashboard-grid">
+                        <div class="card metric-card">
+                            <h3>Saldo Inicial</h3>
+                            <p class="metric-value" id="saldoInicialCard">€0.00</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Total IVA</h3>
+                            <p class="metric-value" id="totalIVACard">€0.00</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Cobros Efectivo</h3>
+                            <p class="metric-value" id="totalEfectivoCard">€0.00</p>
+                        </div>
+                        <div class="card metric-card">
+                            <h3>Saldo Actual</h3>
+                            <p class="metric-value" id="saldoActualCard">€0.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Apuntes del Día</h3>
+                        <table id="tablaApuntesDia" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Nº ID</th>
+                                    <th>Tipo</th>
+                                    <th>Cliente</th>
+                                    <th>Importe</th>
+                                    <th>Pago</th>
+                                    <th>Cobrado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="arquearCaja()">Arquear Caja</button>
+                    </div>
+                </section>
+
+                <!-- CONTROL TPV TALLER -->
+                <section id="controlTPVTaller" class="content-section" style="display: none;">
+                    <h2>Control de Cobros TPV</h2>
+                    
+                    <div class="card">
+                        <h3>Resumen TPV</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Total Cobros TPV:</label>
+                                <p id="totalTPVDia">€0.00</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Número de Transacciones:</label>
+                                <p id="numTransTPV">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Registros TPV del Día</h3>
+                        <table id="tablaTPVTaller" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Nº ID</th>
+                                    <th>Cliente</th>
+                                    <th>Importe</th>
+                                    <th>Cobrado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- HISTORIAL TALLER -->
+                <section id="historial" class="content-section" style="display: none;">
+                    <h2>Historial de Apuntes</h2>
+                    
+                    <div class="filter-group">
+                        <label for="filterHistorialFecha">Fecha:</label>
+                        <input type="date" id="filterHistorialFecha">
+                        
+                        <label for="filterHistorialTipo">Tipo:</label>
+                        <select id="filterHistorialTipo">
+                            <option value="">-- Todos --</option>
+                        </select>
+                        
+                        <label for="filterHistorialPago">Método Pago:</label>
+                        <select id="filterHistorialPago">
+                            <option value="">-- Todos --</option>
+                        </select>
+                        
+                        <button class="btn btn-primary" onclick="aplicarFiltrosHistorial()">Filtrar</button>
+                        <button class="btn btn-secondary" onclick="limpiarFiltrosHistorial()">Limpiar</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Apuntes Registrados</h3>
+                        <table id="tablaHistorial" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Nº ID</th>
+                                    <th>Tipo</th>
+                                    <th>Cliente</th>
+                                    <th>Importe</th>
+                                    <th>Pago</th>
+                                    <th>Cobrado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL AÑADIR CLIENTE -->
+    <div id="modalCliente" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="cerrarModalCliente()">&times;</span>
+            <h2>Añadir Nuevo Cliente</h2>
+            
+            <form id="formNuevoCliente" onsubmit="handleGuardarCliente(event)">
+                <div class="form-group">
+                    <label for="clienteNombre">Nombre Completo:</label>
+                    <input type="text" id="clienteNombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clienteTipo">Tipo:</label>
+                    <select id="clienteTipo" required>
+                        <option value="">-- Selecciona tipo --</option>
+                        <option value="particular">Particular</option>
+                        <option value="empresa">Empresa</option>
+                        <option value="autonomo">Autónomo</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clienteNIF">NIF/CIF:</label>
+                    <input type="text" id="clienteNIF" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalCliente()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIONES -->
+    <div id="notification" class="notification"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
